@@ -7,27 +7,23 @@ namespace Findash.Employees;
 public class EmployeesController : BaseController
 {
     private readonly IRepository<Employee> _repository;
+    private readonly ILogger<EmployeesController> _logger;
 
-    public EmployeesController(IRepository<Employee> repository, IValidator<CreateEmployeeRequest> createValidator)
+    public EmployeesController(
+        IRepository<Employee> repository, 
+        ILogger<EmployeesController> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
 
     [HttpGet]
-    public IActionResult GetAll()
+    public IActionResult GetAllEmployees()
     {
-        return Ok(_repository.GetAll().Select(employee => new GetEmployeeResponse {
-            FirstName = employee.FirstName,
-            LastName = employee.LastName,
-            Address1 = employee.Address1,
-            Address2 = employee.Address2,
-            City = employee.City,
-            State = employee.State,
-            ZipCode = employee.ZipCode,
-            PhoneNumber = employee.PhoneNumber,
-            Email = employee.Email
-        }));
+        var employees = _repository.GetAll().Select(EmployeeToGetEmployeeResponse);
+
+        return Ok(employees);
     }
 
     [HttpGet("{id}")]
@@ -39,27 +35,13 @@ public class EmployeesController : BaseController
             return NotFound();
         }
 
-        return Ok(new GetEmployeeResponse {
-            FirstName = employee.FirstName,
-            LastName = employee.LastName,
-            Address1 = employee.Address1,
-            Address2 = employee.Address2,
-            City = employee.City,
-            State = employee.State,
-            ZipCode = employee.ZipCode,
-            PhoneNumber = employee.PhoneNumber,
-            Email = employee.Email
-        });
+        var employeeResponse = EmployeeToGetEmployeeResponse(employee);
+        return Ok(employeeResponse);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateEmployee(CreateEmployeeRequest employeeRequest)
+    public IActionResult CreateEmployee(CreateEmployeeRequest employeeRequest)
     {
-        var validationResults = await ValidateAsync(employeeRequest);
-        if (!validationResults.IsValid)
-        {
-            return BadRequest(validationResults.ToModelStateDictionary());
-        }
 
         var newEmployee = new Employee {
             FirstName = employeeRequest.FirstName!,
@@ -80,9 +62,11 @@ public class EmployeesController : BaseController
     [HttpPut("{id}")]
     public IActionResult Update(int id, [FromBody] UpdateEmployeeRequest employeeRequest)
     {
+        _logger.LogInformation("Updating employee with id: {id}", id);
         var existingEmployee = _repository.GetById(id);
         if (existingEmployee == null)
         {
+            _logger.LogWarning("Employee with id: {id} does not exist", id);
             return NotFound();
         }
 
@@ -96,5 +80,47 @@ public class EmployeesController : BaseController
 
         _repository.Update(existingEmployee);
         return Ok(existingEmployee);
+    }
+    
+    private static GetEmployeeResponse EmployeeToGetEmployeeResponse(Employee employee)
+    {
+        return new GetEmployeeResponse
+        {
+            FirstName = employee.FirstName,
+            LastName = employee.LastName,
+            Address1 = employee.Address1,
+            Address2 = employee.Address2,
+            City = employee.City,
+            State = employee.State,
+            ZipCode = employee.ZipCode,
+            PhoneNumber = employee.PhoneNumber,
+            Email = employee.Email,
+            Benefits = employee.Benefits.Select(BenefitToBenefitResponse).ToList()
+        };
+    }
+
+    private static GetEmployeeResponseEmployeeBenefit BenefitToBenefitResponse(EmployeeBenefits benefit)
+    {
+        return new GetEmployeeResponseEmployeeBenefit
+        {
+            Id = benefit.Id,
+            EmployeeId = benefit.EmployeeId,
+            BenefitType = benefit.BenefitType,
+            Cost = benefit.Cost
+        };
+    }
+    
+    [HttpGet("{employeeId}/benefits")]
+    [ProducesResponseType(typeof(IEnumerable<GetEmployeeResponseEmployeeBenefit>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public IActionResult GetBenefitsForEmployee(int employeeId)
+    {
+        var employee = _repository.GetById(employeeId);
+        if (employee == null)
+        {
+            return NotFound();
+        }
+        return Ok(employee.Benefits.Select(BenefitToBenefitResponse));
     }
 }
