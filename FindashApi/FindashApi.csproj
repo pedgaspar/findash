@@ -4,10 +4,20 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+<<<<<<< Updated upstream:FindashApi/FindashApi.csproj
         <RootNamespace>Findash</RootNamespace>
+=======
+<<<<<<< Updated upstream:Findash/Findash.csproj
+=======
+        <RootNamespace>Findash</RootNamespace>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+>>>>>>> Stashed changes:FindashApi/FindashApi.csproj
+>>>>>>> Stashed changes:Findash/Findash.csproj
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.11.0" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4"/>
     </ItemGroup>
 

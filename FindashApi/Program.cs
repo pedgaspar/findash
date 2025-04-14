@@ -1,8 +1,18 @@
+using Findash;
+using Findash.Abstractions;
+using FluentValidation;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<IRepository<Employee>, EmployeeRepository>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddProblemDetails();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -14,11 +24,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.MapControllers();
 
+<<<<<<< Updated upstream:Findash/Program.cs
 app.MapGet("/weatherforecast", () =>
 {
         var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -39,3 +47,6 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+=======
+app.Run();
+>>>>>>> Stashed changes:FindashApi/Program.cs
