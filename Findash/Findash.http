@@ -1,0 +1,6 @@
+@Findash_HostAddress = http://localhost:5111
+
+GET {{Findash_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
