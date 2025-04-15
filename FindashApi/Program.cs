@@ -1,6 +1,7 @@
 using Findash;
 using Findash.Abstractions;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,12 @@ builder.Services.AddProblemDetails();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<FluentValidationFilter>();
+});
+
+var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(connStr);
 });
 
 builder.Services.AddHttpContextAccessor();
