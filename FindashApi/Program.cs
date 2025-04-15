@@ -28,6 +28,15 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+// Dependecy Injection Pipeline já foi construída então podemos chamar coisas
+// Criámos um novo scope porque não podemos associar isto ao root scope
+// Um scope em ASP.NET Core representa o ciclo de vida de um Http Request
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    SeedData.Seed(services);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

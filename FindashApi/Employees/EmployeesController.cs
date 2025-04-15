@@ -1,6 +1,7 @@
 ﻿using Findash.Abstractions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Findash.Employees;
 
@@ -8,22 +9,48 @@ public class EmployeesController : BaseController
 {
     private readonly IRepository<Employee> _repository;
     private readonly ILogger<EmployeesController> _logger;
+    private readonly AppDbContext _dbContext;
 
     public EmployeesController(
         IRepository<Employee> repository, 
-        ILogger<EmployeesController> logger)
+        ILogger<EmployeesController> logger,
+        AppDbContext dbContext)
     {
         _repository = repository;
         _logger = logger;
+        _dbContext = dbContext;
     }
 
 
     [HttpGet]
-    public IActionResult GetAllEmployees()
+    [ProducesResponseType(typeof(IEnumerable<GetEmployeeResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetAllEmployees([FromQuery] GetAllEmployeesRequest? request)
     {
-        var employees = _repository.GetAll().Select(EmployeeToGetEmployeeResponse);
+        int page = request?.Page ?? 1;
+        int numberOfRecords = request?.RecordsPerPage ?? 100;
 
-        return Ok(employees);
+        IQueryable<Employee> query = _dbContext.Employees
+            .Include(e => e.Benefits)
+            .Skip((page - 1) * numberOfRecords)
+            .Take(numberOfRecords);
+
+        if (request != null)
+        {
+            if (!string.IsNullOrWhiteSpace(request.FirstNameContains))
+            {
+                query = query.Where(e => e.FirstName.Contains(request.FirstNameContains));
+            }
+        
+            if (!string.IsNullOrWhiteSpace(request.LastNameContains))
+            {
+                query = query.Where(e => e.LastName.Contains(request.LastNameContains));
+            }
+        }
+
+        var employees = await query.ToArrayAsync();
+
+        return Ok(employees.Select(EmployeeToGetEmployeeResponse));
     }
 
     [HttpGet("{id}")]
