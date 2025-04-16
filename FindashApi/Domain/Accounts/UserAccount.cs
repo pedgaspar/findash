@@ -1,10 +1,11 @@
+using Findash.Users;
+
 namespace Findash.Domain.Accounts;
 
-public class UserAccount : BaseEntity
+public class UserAccount
 {
-    public int EmployeeId { get; set; }
-    public Employee Employee { get; set; } = null!;
-    public int BenefitId { get; set; }
-    public Benefit Benefit { get; set; } = null!;
-    public decimal? CostToEmployee { get; set; }
+    public Guid UserId { get; set; }
+    public User User { get; set; } = null!;
+    public Guid AccountId { get; set; }
+    public Account Account { get; set; } = null!;
 }

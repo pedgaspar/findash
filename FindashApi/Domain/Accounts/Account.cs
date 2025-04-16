@@ -1,6 +1,6 @@
 namespace Findash.Domain.Accounts;
 
-public class Account
+public class Account : BaseEntity
 {
-    
+    public double Balance { get; set; }
 }
