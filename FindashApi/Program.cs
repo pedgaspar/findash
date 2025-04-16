@@ -1,5 +1,5 @@
 using Findash;
-using Findash.Abstractions;
+using Findash.Users;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,17 +7,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-// Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSingleton<IRepository<Employee>, EmployeeRepository>();
+builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
+
+// Validation stuff
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddProblemDetails();
+builder.Services.AddHttpContextAccessor();
+
+// Controllers
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<FluentValidationFilter>();
 });
 
+// Database stuff
 var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -25,7 +31,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
-builder.Services.AddHttpContextAccessor();
+// Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
@@ -42,6 +49,8 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

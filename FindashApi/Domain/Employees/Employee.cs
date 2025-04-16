@@ -2,7 +2,6 @@
 
 public class Employee : BaseEntity
 {
-    public int Id { get; set; }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string? SocialSecurityNumber { get; set; }
@@ -15,7 +14,6 @@ public class Employee : BaseEntity
     public string? PhoneNumber { get; set; }
     public string? Email { get; set; }
     public List<EmployeeBenefit> Benefits { get; set; } = [];
-
 }
 
 public class Benefit

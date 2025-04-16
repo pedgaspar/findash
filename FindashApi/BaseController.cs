@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Findash;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public abstract class BaseController : Controller
 {
     protected async Task<ValidationResult> ValidateAsync<T>(T instance)
