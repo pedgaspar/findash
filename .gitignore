@@ -6,3 +6,4 @@ riderModule.iml
 .idea/
 FindashApi/appsettings.Development.json
 Findash.sln.DotSettings.user
+volumes/*

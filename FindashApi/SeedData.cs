@@ -1,4 +1,5 @@
-﻿using Findash.Users;
+﻿using Findash.Domain.Accounts;
+using Findash.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Findash;
@@ -15,6 +16,7 @@ public static class SeedData
             var users = new List<User>
             {
                 new User
+                    
                 {
                     Id = new Guid(),
                     FirstName = "Paula",
@@ -37,6 +39,49 @@ public static class SeedData
             };
             
             context.Users.AddRange(users);
+            context.SaveChanges();
+        }
+        
+        if (!context.Accounts.Any())
+        {
+            var accounts = new List<Account>
+            {
+                new Account
+                {
+                    Id = new Guid(),
+                    Balance = 100.50,
+                },
+                new Account
+                {
+                    Id = new Guid(),
+                    Balance = 12,
+                },
+            };
+            
+            context.Accounts.AddRange(accounts);
+            context.SaveChanges();
+            
+            var paula = context.Users.Single(u => u.Email == "paula.vadinho@gmail.com");
+            var oscar =  context.Users.Single(u => u.Email == "oscar.alho@gmail.com");
+
+            paula.Accounts = new List<UserAccount>
+            {
+                new UserAccount()
+                {
+                    Account = accounts.First(),
+                    User = paula,
+                }
+            };
+            
+            oscar.Accounts = new List<UserAccount>
+            {
+                new UserAccount()
+                {
+                    Account = accounts.Last(),
+                    User = oscar,
+                }
+            };
+            
             context.SaveChanges();
         }
 
